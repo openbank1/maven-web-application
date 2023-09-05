@@ -23,12 +23,14 @@ buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', 
              sh "mvn clean package"
             }
         }
+/*
         stage('ExecuteSonarqreport'){
             steps{
                 sh "mvn clean sonar:sonar"
             }
             
         }
+*/
         stage('uploadartfactoryintonexus'){
             steps{
                 sh "mvn clean deploy"
