@@ -1,0 +1,65 @@
+pipeline{
+
+agent any
+
+  tools{
+      maven "Maven3.9.4"
+  }
+options{
+timestamps()
+buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5'))
+}
+
+    stages{
+        
+        stage('Checkoutoutcode')
+        {
+            steps{
+             git credentialsId: '63036149-d933-4eb9-812d-2befa6969bdc', url: 'https://github.com/openbank1/maven-web-application.git'
+            }
+        }
+        stage('build'){
+            steps{
+             sh "mvn clean package"
+            }
+        }
+        stage('ExecuteSonarqreport'){
+            steps{
+                sh "mvn clean sonar:sonar"
+            }
+            
+        }
+        stage('uploadartfactoryintonexus'){
+            steps{
+                sh "mvn clean deploy"
+            }
+        }
+        stage('deploytheaplicationintotomcat'){
+            steps{
+                sshagent(['3eaf4bb1-1b65-4602-837f-37acc8586625']) {
+     sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@35.154.5.205:/opt/apache-tomcat-9.0.71/webapps/"
+}
+            }
+        }
+    }//closing the stages 
+ post{
+    always {
+    emailext body: '''Build is over 
+
+Thanks,
+Nuru''', subject: 'Build over ', to: 'annenuru5@gmail.com'
+    }
+    failure  {
+    emailext body: '''Build is over 
+
+Thanks,
+Nuru''', subject: 'Build over ', to: 'annenuru5@gmail.com'
+    }
+   success {
+    emailext body: '''Build is over 
+
+Thanks,
+Nuru''', subject: 'Build over ', to: 'annenuru5@gmail.com'
+    }
+}
+}//closing pipline
